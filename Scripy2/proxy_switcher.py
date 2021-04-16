@@ -24,7 +24,7 @@ class Switcher(object):
     def __init__(self):
         self.proxies = []
         self.session = requests.Session()
-        self.last_page = None
+        self.page = None
 
     @Handler_bad_case
     def send_request(self, endpoint='/'):
@@ -41,7 +41,7 @@ class Switcher(object):
             return False
 
         if response.status_code == 200:
-            self.last_page = response.text
+            self.page = response.text
             return True
         else:
             if response.status_code == 429:
@@ -52,8 +52,8 @@ class Switcher(object):
                 return False
 
     @Handler_bad_case
-    def load_proxies(self):
-        html = BeautifulSoup(self.last_page, 'html.parser')
+    def get_proxies(self):
+        html = BeautifulSoup(self.page, 'html.parser')
         table = html.find('table', {'id': 'proxylisttable'}).find('tbody')
         rows = ""
         if table is not None:
@@ -78,5 +78,5 @@ class Switcher(object):
             time.sleep(60 * 1)
             ret = self.send_request()
             if ret:
-                self.load_proxies()
+                self.get_proxies()
                 self.get_new_proxy()
